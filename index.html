@@ -17,36 +17,42 @@
   <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
 
   <script>
-    var startSound = new Howl({
-      src: ['启动.aac'],
-      rate: 1
-    });
+    var startSound, initialAccelerationSound, idleAfterStartSound, throttleSound, idleThrottleSound, stopSound;
 
-    var initialAccelerationSound = new Howl({
-      src: ['初始启动加速.aac'],
-      rate: 1
-    });
+    function preloadAudio() {
+      startSound = new Howl({
+        src: ['start.aac'],
+        rate: 1
+      });
 
-    var idleAfterStartSound = new Howl({
-      src: ['启动后怠速.aac'],
-      loop: true,
-      rate: 1
-    });
+      initialAccelerationSound = new Howl({
+        src: ['starttorun.aac'],
+        rate: 1
+      });
 
-    var throttleSound = new Howl({
-      src: ['轰油.aac'],
-      rate: 1
-    });
+      idleAfterStartSound = new Howl({
+        src: ['run.aac'],
+        loop: true,
+        rate: 1
+      });
 
-    var idleThrottleSound = new Howl({
-      src: ['怠速中加油.aac'],
-      rate: 1
-    });
+      throttleSound = new Howl({
+        src: ['max.aac'],
+        rate: 1
+      });
 
-    var stopSound = new Howl({
-      src: ['熄火.aac'],
-      rate: 1
-    });
+      idleThrottleSound = new Howl({
+        src: ['runtorun.aac'],
+        rate: 1
+      });
+
+      stopSound = new Howl({
+        src: ['stop.aac'],
+        rate: 1
+      });
+    }
+
+    preloadAudio(); // 预加载音频
 
     var playButton = document.getElementById('startButton');
     var throttleButton = document.getElementById('throttleButton');
@@ -54,10 +60,11 @@
     var speedSlider = document.getElementById('speedSlider');
 
     playButton.addEventListener('click', function() {
+      
       startSound.play();
-      startSound.once('end', function() {
+      startSound.on('end', function() {
         initialAccelerationSound.play();
-        initialAccelerationSound.once('end', function() {
+        initialAccelerationSound.on('end', function() {
           idleAfterStartSound.play();
         });
       });
@@ -65,13 +72,13 @@
 
     throttleButton.addEventListener('click', function() {
       throttleSound.play();
-      // 在此设置加速后怠速的音频速度
-      idleThrottleSound.rate(1.5); // 举例，你可以根据需要调整速度
-      idleThrottleSound.play();
+      idleAfterStartSound.fade(1, 0, 1000);
+      throttleSound.on('end', function() {
+        idleThrottleSound.play();
+      });
     });
 
     stopButton.addEventListener('click', function() {
-      // 停止所有音频
       startSound.stop();
       initialAccelerationSound.stop();
       idleAfterStartSound.stop();
@@ -83,7 +90,7 @@
     speedSlider.addEventListener('input', function() {
       var speed = parseFloat(this.value);
       idleAfterStartSound.rate(speed);
-      idleThrottleSound.rate(speed); // 也可根据需要调整其他音频的速度
+      idleThrottleSound.rate(speed);
     });
   </script>
 </body>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.bootcdn.net/ajax/libs/howler/2.2.3/howler.min.js"></script>
+  <style>
+    #speedSlider {
+      width: 300px; /* 调整滑动条的长度 */
+    }
+  </style>
+</head>
+<body>
+  <h1>175采油机模拟器</h1>
+  <button id="playButton">启动/停止</button>
+  <button id="loopButton" class="active">循环</button>
+  <span>油门:</span>
+  <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
+
+  <script>
+    var sound = new Howl({
+      src: ['./run.mp3'],
+      loop: true, // 默认为单曲循环
+      rate: 1
+    });
+
+    var playButton = document.getElementById('playButton');
+    var loopButton = document.getElementById('loopButton');
+    var speedSlider = document.getElementById('speedSlider');
+
+    playButton.addEventListener('click', function() {
+      if (sound.playing()) {
+        sound.pause();
+      } else {
+        sound.play();
+      }
+    });
+
+    loopButton.addEventListener('click', function() {
+      sound.loop(!sound.loop()); // 切换循环状态
+      loopButton.classList.toggle('active'); // 切换按钮样式
+    });
+
+    speedSlider.addEventListener('input', function() {
+      var speed = parseFloat(this.value);
+      sound.rate(speed);
+    });
+  </script>
+</body>
+</html>

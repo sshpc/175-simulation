@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <script src="https://cdn.bootcdn.net/ajax/libs/howler/2.2.3/howler.min.js"></script>
   <style>
@@ -8,89 +9,106 @@
     }
   </style>
 </head>
+
 <body>
-  <h1>175采油机模拟器</h1>
+  <h1>175柴油机模拟器</h1>
   <button id="startButton">启动</button>
-  <button id="throttleButton">轰油</button>
+  <button id="throttleButton">满油</button>
   <button id="stopButton">熄火</button>
   <span>油门:</span>
   <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
 
   <script>
-    var startSound, initialAccelerationSound, idleAfterStartSound, throttleSound, idleThrottleSound, stopSound;
-
-    function preloadAudio() {
+    var startSound, torunSound, runSound, maxSound, stopSound;
       startSound = new Howl({
         src: ['start.aac'],
+        preload: true,
         rate: 1
       });
-
-      initialAccelerationSound = new Howl({
-        src: ['starttorun.aac'],
+      torunSound = new Howl({
+        src: ['torun.aac'],
+        //loop: true,
+        preload: true,
         rate: 1
       });
-
-      idleAfterStartSound = new Howl({
+      runSound = new Howl({
         src: ['run.aac'],
-        loop: true,
+        //loop: true,
+        preload: true,
         rate: 1
       });
-
-      throttleSound = new Howl({
+      maxSound = new Howl({
         src: ['max.aac'],
+        preload: true,
         rate: 1
       });
-
-      idleThrottleSound = new Howl({
-        src: ['runtorun.aac'],
-        rate: 1
-      });
-
       stopSound = new Howl({
         src: ['stop.aac'],
+        preload: true,
         rate: 1
       });
-    }
-
-    preloadAudio(); // 预加载音频
-
     var playButton = document.getElementById('startButton');
     var throttleButton = document.getElementById('throttleButton');
     var stopButton = document.getElementById('stopButton');
     var speedSlider = document.getElementById('speedSlider');
-
-    playButton.addEventListener('click', function() {
-      
+    //点击启动
+    playButton.addEventListener('click', function () {
+      startSound.volume(0.8);
       startSound.play();
-      startSound.on('end', function() {
-        initialAccelerationSound.play();
-        initialAccelerationSound.on('end', function() {
-          idleAfterStartSound.play();
+      
+      console.log('startrun');
+      runSound.volume(0);
+      runSound.play();
+      startSound.on('end', function () {
+        console.log('startend');
+        //torunSound.volume(0.8);
+        
+        runSound.volume(0.8);
+        
+      });
+      // torunSound.on('end', function () {
+      //   console.log('torunend');
+      //   runSound.volume(0.8);
+        
+      // });
+      runSound.on('end', function () {
+        console.log('runend');
+        runSound.volume(0.8);
+        runSound.play();
+      });
+    });
+    //点击满油
+    throttleButton.addEventListener('click', function () {
+      //判断是否播放中
+      if (runSound.playing()) {
+        runSound.volume(0.2);
+        if (!maxSound.playing()){
+          maxSound.play();
+        }
+        
+        //runSound.fade(1, 0, 1000);
+        maxSound.on('end', function () {
+          runSound.volume(0.8);
+          
         });
-      });
+      }
     });
-
-    throttleButton.addEventListener('click', function() {
-      throttleSound.play();
-      idleAfterStartSound.fade(1, 0, 1000);
-      throttleSound.on('end', function() {
-        idleThrottleSound.play();
-      });
+    //点击熄火
+    stopButton.addEventListener('click', function () {
+      //判断是否播放中
+      if (runSound.playing()||startSound.playing()||torunSound.playing()) {
+        startSound.stop();
+        torunSound.stop();
+        runSound.stop();
+        maxSound.stop();
+        stopSound.play();
+        console.log('allstop');
+      }
     });
-
-    stopButton.addEventListener('click', function() {
-      startSound.stop();
-      initialAccelerationSound.stop();
-      idleAfterStartSound.stop();
-      throttleSound.stop();
-      idleThrottleSound.stop();
-      stopSound.play();
-    });
-
-    speedSlider.addEventListener('input', function() {
+    //改变油门
+    speedSlider.addEventListener('input', function () {
       var speed = parseFloat(this.value);
-      idleAfterStartSound.rate(speed);
-      idleThrottleSound.rate(speed);
+      runSound.rate(speed);
     });
   </script>
 </body>
